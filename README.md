@@ -2,6 +2,7 @@
 A small project that allows you to have your Spotify Discover Weekly playlist automatically saved to a playlist named 'Discover XXXX', where XXXX is the current year
 
 # How To Setup
+## Approximate Setup Time: 15 minutes
 1. Fork the repository
 2. Create a Heroku App from the repo - using the `main` branch as the primary branch to run.
     - if you don't have a Heroku account, create one at [Heroku's website](https://id.heroku.com/login)

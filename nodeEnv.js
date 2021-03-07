@@ -5,5 +5,6 @@ module.exports = {
     ACCESS_TOKEN: process.env.ACCESS_TOKEN || '',
     REFRESH_TOKEN: process.env.REFRESH_TOKEN || '',
     USER_ID: process.env.USER_ID || '',
+    PORT: process.env.PORT || 8888,
     CURRENT_YEAR: `${(new Date()).getFullYear()}`
 }
