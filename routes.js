@@ -62,25 +62,27 @@ router.get('/callback', function(req, res) {
     };
     request.post(authOptions, function(error, response, body) {
       if (!error && response.statusCode === 200) {
+        // Get the tokens
         var access_token = body.access_token, refresh_token = body.refresh_token;
-        var options = {
-          url: 'https://api.spotify.com/v1/me',
-          headers: { 'Authorization': 'Bearer ' + access_token },
-          json: true
-        };
 
-        // use the access token to access the Spotify Web API
-        request.get(options, function(error, response, body) {
-          console.log(body);
-        });
-
-        // we can also pass the token to the browser to make requests from there
-        res.redirect('/#' +
-          querystring.stringify({
-            access_token: access_token,
-            refresh_token: refresh_token
-          })
-        );
+        // Pass the token to the browser
+        const htmlTxt = `
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+              <meta charset="UTF-8">
+              <title>Discover Weekly Saver</title>        
+              <style>
+                  body { padding-top:20px; }
+              </style>
+          </head>
+          <body>
+            <p>Access Token: ${access_token}</p>
+            <p>Refresh Token: ${refresh_token}</p>
+          </body>
+          </html>
+        `;
+        res.send(htmlTxt);
       } else {
         res.redirect('/#' +
           querystring.stringify({
