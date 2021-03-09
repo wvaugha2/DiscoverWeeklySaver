@@ -65,6 +65,13 @@ router.get('/login', function(req, res) {
 /**
  * @description Signup Success page
  */
+router.get('/home/existing-account', function(req, res) {
+  return res.send(readHtmlFile('already-signed-up.html'));
+});
+
+/**
+ * @description Signup Success page
+ */
 router.get('/signup-success', function(req, res) {
   return res.send(readHtmlFile('signup-success.html'));
 });
@@ -106,7 +113,7 @@ router.get('/callback', async function(req, res) {
     const users = await postgresqlApi.getUsers();
     if (Array.isArray(users) && users.findIndex(user => user.user_id === getUserIdResponse.id) !== -1) {
       postgresqlApi.updateUser(getUserIdResponse.id, getAccessTokenResponse.refreshToken);
-      return res.redirect('/signup-success');
+      return res.redirect('/home/existing-account');
     }
 
     // Add the new user and kick off an asynchronous call to manually run the web hook
