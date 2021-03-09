@@ -3,10 +3,11 @@ const axios = require('axios');
 
 /**
  * @description - /api/token => retrieves the access and refresh tokens
- * @param {string} authCode - The authorization code
+ * @param {string} authCode - The authorization code for a new user
+ * @param {string} refreshToken - the refresh token for the current user
  * @returns {Object} an object
  */
-const getAccessToken = async (authCode) => {
+const getAccessToken = async (authCode, refreshToken) => {
   // Initialize response object
   const tmpObj = {};
   tmpObj.status = null;
@@ -22,7 +23,7 @@ const getAccessToken = async (authCode) => {
       formData.append('redirect_uri', nodeEnv.REDIRECT_URI);
       formData.append('grant_type', 'authorization_code');
     } else {
-      formData.append('refresh_token', nodeEnv.REFRESH_TOKEN);
+      formData.append('refresh_token', refreshToken);
       formData.append('grant_type', 'refresh_token');
     }
     formData.append('client_id', nodeEnv.CLIENT_ID);
@@ -39,6 +40,43 @@ const getAccessToken = async (authCode) => {
       })
       .catch((error) => {
         tmpObj.status = 'FAILURE';
+        tmpObj.message = error && error.response && error.response.data && error.response.data.error ? error.response.data.error : `${error}`;
+        return resolve(tmpObj);
+      })
+  });
+}
+
+/**
+ * @description /me => gets profile info for the profile who's access_token is being used
+ * @param {string} accessToken - The access token recently pulled via API
+ * @returns {Object} an object
+ */
+const getUserId = async (accessToken) => {
+  if (!accessToken) {
+    return null;
+  }
+
+  // Initialize response object
+  const tmpObj = {};
+  tmpObj.status = null;
+  tmpObj.message = null;
+  tmpObj.id = null;
+
+  return new Promise(async (resolve, reject) => {
+    // Perform the request
+    return axios.get(`https://api.spotify.com/v1/me`, {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`
+      }
+    })
+      .then((response) => {
+        tmpObj.status = 'SUCCESS';
+        tmpObj.message = '';
+        tmpObj.id = response && response.data && response.data.id ? response.data.id : null;
+        return resolve(tmpObj);
+      })
+      .catch((error) => {
+        tmpObj.status = 'FAILURE';
         tmpObj.message = `${error}`;
         return resolve(tmpObj);
       })
@@ -48,9 +86,10 @@ const getAccessToken = async (authCode) => {
 /**
  * @description /users/{user_id}/playlists => retrieves all playlists a user currently has
  * @param {string} accessToken - The access token recently pulled via API
+ * @param {string} userId - the id of the current user
  * @returns {Object} an object
  */
-const getUsersPlaylists = async (accessToken) => {
+const getUsersPlaylists = async (accessToken, userId) => {
   if (!accessToken) {
     return null;
   }
@@ -71,7 +110,7 @@ const getUsersPlaylists = async (accessToken) => {
     while (continueReqs && numRequests < maxRequests) {
       try {
         // Perform the request
-        const response = await axios.get(`https://api.spotify.com/v1/users/${nodeEnv.USER_ID}/playlists?offset=${offset}&limit=${limit}`, {
+        const response = await axios.get(`https://api.spotify.com/v1/users/${userId}/playlists?offset=${offset}&limit=${limit}`, {
           headers: {
             'Authorization': `Bearer ${accessToken}`
           }
@@ -117,12 +156,13 @@ const getUsersPlaylists = async (accessToken) => {
 /**
  * @description /users/{user_id}/playlists => creates a new playlist
  * @param {string} accessToken - The access token recently pulled via API
+ * @param {string} userId - the id of the current user
  * @param {string} name - the name of the new playlist
  * @param {string} [description = ''] - the description for the new playlist
  * @param {boolean} [public = false] - whether or not the playlist will be public
  * @returns {Object} an object
  */
-const createNewPlaylist = async (accessToken, name, description = '', public = false) => {
+const createNewPlaylist = async (accessToken, userId, name, description = '', public = false) => {
   if (!accessToken || !name) {
     return null;
   }
@@ -143,7 +183,7 @@ const createNewPlaylist = async (accessToken, name, description = '', public = f
     };
 
     // Perform the request
-    return axios.post(`https://api.spotify.com/v1/users/${nodeEnv.USER_ID}/playlists`, payload, {
+    return axios.post(`https://api.spotify.com/v1/users/${userId}/playlists`, payload, {
       headers: {
         'Authorization': `Bearer ${accessToken}`
       }
@@ -277,6 +317,7 @@ const addTracksToPlaylist = async (accessToken, playlistId, tracksToAdd) => {
 
 module.exports = {
   getAccessToken,
+  getUserId,
   getUsersPlaylists,
   createNewPlaylist,
   getTracksForPlaylist,
