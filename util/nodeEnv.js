@@ -6,5 +6,11 @@ module.exports = {
     REFRESH_TOKEN: process.env.REFRESH_TOKEN || '',
     USER_ID: process.env.USER_ID || '',
     PORT: process.env.PORT || 8888,
-    CURRENT_YEAR: `${(new Date()).getFullYear()}`
+    SIGNUP_LIMIT: process.env.SIGNUP_LIMIT,
+    CURRENT_YEAR: `${(new Date()).getFullYear()}`,
+    PGUSER: process.env.PGUSER,
+    PGHOST: process.env.PGHOST,
+    PGPASSWORD: process.env.PGPASSWORD,
+    PGDATABASE: process.env.PGDATABASE,
+    PGPORT: process.env.PGPORT
 }
