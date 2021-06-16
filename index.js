@@ -15,11 +15,23 @@ const startup = async () => {
       .use(cookieParser());
    app.use('', routes);
 
+   // Set the app to use EJS template engine
+   app.set('views', './views');
+   app.set('view engine', 'ejs');
+
+   // Disable webpage caching
+   app.use((req, res, next) => {
+      res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+      res.set('Pragma', 'no-cache');
+      res.set('Expires', '0');
+      res.set('Surrogate-Control', 'no-store');
+      next();
+   });
+
    // Retrieve users to initialize the number of users
    console.log('Fetching the current number of users on start up...')
    await postgresqlApi.getUsers();
    console.log('Current number of users:', appState.getNumUsers());
-
 
    // Begin listening
    console.log('\nListening on 8888');

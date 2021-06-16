@@ -1,6 +1,7 @@
 module.exports = {
   CLIENT_ID: process.env.CLIENT_ID || '',
   CLIENT_SECRET: process.env.CLIENT_SECRET || '',
+  HOST_URL: process.env.HOST_URL || '',
   REDIRECT_URI: process.env.REDIRECT_URI || '',
   ACCESS_TOKEN: process.env.ACCESS_TOKEN || '',
   REFRESH_TOKEN: process.env.REFRESH_TOKEN || '',

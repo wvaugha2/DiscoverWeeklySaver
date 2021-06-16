@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%- include('../partials/head'); %>
+  </head>
+  <body>
+    <div class="bgSecondary fullWidth fullHeight py-5">
+      <!-- Navigation -->
+      <%- include('../partials/navbar', {
+        links: [
+          {
+            disabled: alreadySignedUp || maxUsersReached ? true : false,
+            url: alreadySignedUp || maxUsersReached ? '#' : `${hostUrl}/login`,
+            text: 'Sign Up'
+          }
+        ]
+      }); %>
+
+      <!-- Content -->
+      <div class="container">
+        <div class="row h-100 d-flex justify-content-center align-items-center">
+          <div class="col-lg-6 col-md-8 col-sm-10 col-xs-10">
+            <h1 class="text-center display-4 my-5">Never miss out on a killer song again</h1>
+            <p class="text-center lead mb-5">By signing up for the Discover Weekly Saver app, each week's Discover Weekly playlist will be saved to a playlist spanning all Discover Weekly playlists for the year!</p>
+          </div>
+          <% if(alreadySignedUp) { %>
+            <div class="col-12 d-flex justify-content-center">
+              <button type="button" class="btn btn-primary btn-lg roundSubmitBtn" onclick="location.href='#'" disabled>Sign Up</button>
+            </div>
+            <div class="col-12 d-flex justify-content-center mt-3">
+              <p class="text-center tinyText">Looks like you're already signed up!</p>
+            </div>
+          <% } else if(maxUsersReached) { %>
+            <div class="col-12 d-flex justify-content-center">
+              <button type="button" class="btn btn-primary btn-lg roundSubmitBtn" onclick="location.href='#'" disabled>Sign Up</button>
+            </div>
+            <div class="col-12 d-flex justify-content-center mt-3">
+              <p class="text-center tinyText">Our sign up list has reached the maximum number of users</p>
+            </div>
+          <% } else { %>
+            <div class="col-12 d-flex justify-content-center">
+              <button type="button" class="btn btn-primary btn-lg roundSubmitBtn" onclick="location.href='<%- hostUrl %>/login'">Sign Up</button>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

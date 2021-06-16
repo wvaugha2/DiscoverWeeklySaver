@@ -31,9 +31,9 @@ var generateRandomString = function(length) {
 router.get('/', function(req, res) {
   const numUsers = appState.getNumUsers();
   if (numUsers && numUsers >= nodeEnv.SIGNUP_LIMIT) {
-    return res.send(readHtmlFile('home-no-signup.html'));
+    return res.render('pages/home', { hostUrl: nodeEnv.HOST_URL, alreadySignedUp: false, maxUsersReached: true });
   } else {
-    return res.send(readHtmlFile('home.html'));
+    return res.render('pages/home', { hostUrl: nodeEnv.HOST_URL, alreadySignedUp: false, maxUsersReached: false });
   }
 });
 
@@ -66,21 +66,21 @@ router.get('/login', function(req, res) {
  * @description Signup Success page
  */
 router.get('/home/existing-account', function(req, res) {
-  return res.send(readHtmlFile('already-signed-up.html'));
+  return res.render('pages/home', { hostUrl: nodeEnv.HOST_URL, alreadySignedUp: true, maxUsersReached: false });
 });
 
 /**
  * @description Signup Success page
  */
 router.get('/signup-success', function(req, res) {
-  return res.send(readHtmlFile('signup-success.html'));
+  return res.render('pages/signup', { hostUrl: nodeEnv.HOST_URL, isSuccessful: true });
 });
 
 /**
  * @description Signup Failure page
  */
 router.get('/signup-failure', function(req, res) {
-  return res.send(readHtmlFile('signup-failure.html'));
+  return res.render('pages/signup', { hostUrl: nodeEnv.HOST_URL, isSuccessful: false });
 });
   
 /**
