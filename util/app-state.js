@@ -9,18 +9,18 @@ let numUsers = undefined;
  * @returns {number} the number of users signed up for the app
  */
 const getNumUsers = () => {
-    return numUsers;
-  }
+  return numUsers;
+}
   
 /**
  * @description Updates the number of users signed up for the app
  * @param {number} newNumUsers - the new number of users
  */
 const updateNumUsers = (newNumUsers) => {
-    numUsers = newNumUsers;
+  numUsers = newNumUsers;
 }
 
 module.exports = {
-    getNumUsers,
-    updateNumUsers
+  getNumUsers,
+  updateNumUsers
 }
