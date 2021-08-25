@@ -8,6 +8,7 @@ module.exports = {
   USER_ID: process.env.USER_ID || '',
   PORT: process.env.PORT || 8888,
   SIGNUP_LIMIT: process.env.SIGNUP_LIMIT,
+  CRYPTO_KEY: process.env.CRYPTO_KEY,
   CURRENT_YEAR: `${(new Date()).getFullYear()}`,
   PGUSER: process.env.PGUSER,
   PGHOST: process.env.PGHOST,

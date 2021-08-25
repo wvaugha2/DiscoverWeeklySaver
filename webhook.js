@@ -12,7 +12,7 @@ const performWebHook = async () => {
     // For each user, perform the hook
     let webhookPromises = [];
     for (let i = 0; i < users.length; i++) {
-      webhookPromises.push(addDiscoverWeeklyToDiscoverYear(users[i].user_id, users[i].refresh_token));
+      webhookPromises.push(addDiscoverWeeklyToDiscoverYear(users[i].user_id, users[i].refresh_token, users[i].iv));
     }
 
     // Wait for all promises to resolve
