@@ -7,6 +7,7 @@ const nodeEnv = require('./util/nodeEnv');
 const appState = require('./util/app-state');
 const spotifyApi = require('./util/spotify-api');
 const postgresqlApi = require('./util/postgresql-api');
+const crypto = require('./util/crypto');
 const addDiscoverWeeklyToDiscoverYear = require('./util/discover-weekly-saver-funcs').addDiscoverWeeklyToDiscoverYear;
 const readHtmlFile = require('./util/fileReader').readHtmlFile;
 var stateKey = 'spotify_auth_state';
@@ -31,9 +32,9 @@ var generateRandomString = function(length) {
 router.get('/', function(req, res) {
   const numUsers = appState.getNumUsers();
   if (numUsers && numUsers >= nodeEnv.SIGNUP_LIMIT) {
-    return res.send(readHtmlFile('home-no-signup.html'));
+    return res.render('pages/home', { hostUrl: nodeEnv.HOST_URL, alreadySignedUp: false, maxUsersReached: true });
   } else {
-    return res.send(readHtmlFile('home.html'));
+    return res.render('pages/home', { hostUrl: nodeEnv.HOST_URL, alreadySignedUp: false, maxUsersReached: false });
   }
 });
 
@@ -66,21 +67,21 @@ router.get('/login', function(req, res) {
  * @description Signup Success page
  */
 router.get('/home/existing-account', function(req, res) {
-  return res.send(readHtmlFile('already-signed-up.html'));
+  return res.render('pages/home', { hostUrl: nodeEnv.HOST_URL, alreadySignedUp: true, maxUsersReached: false });
 });
 
 /**
  * @description Signup Success page
  */
 router.get('/signup-success', function(req, res) {
-  return res.send(readHtmlFile('signup-success.html'));
+  return res.render('pages/signup', { hostUrl: nodeEnv.HOST_URL, isSuccessful: true });
 });
 
 /**
  * @description Signup Failure page
  */
 router.get('/signup-failure', function(req, res) {
-  return res.send(readHtmlFile('signup-failure.html'));
+  return res.render('pages/signup', { hostUrl: nodeEnv.HOST_URL, isSuccessful: false });
 });
   
 /**
@@ -109,19 +110,25 @@ router.get('/callback', async function(req, res) {
       return res.redirect('/signup-failure');
     }
 
+    // Encrypt the new refresh token for storage
+    const encryptionRespObj = crypto.encrypt(getAccessTokenResponse.refreshToken);
+    if (!encryptionRespObj) {
+      return res.redirect('/signup-failure');
+    }
+
     // Get all existing users for app; If the user is already signed up, don't sign them up again. Instead, update the refresh token
     const users = await postgresqlApi.getUsers();
     if (Array.isArray(users) && users.findIndex(user => user.user_id === getUserIdResponse.id) !== -1) {
-      postgresqlApi.updateUser(getUserIdResponse.id, getAccessTokenResponse.refreshToken);
+      postgresqlApi.updateUser(getUserIdResponse.id, encryptionRespObj.encryption, encryptionRespObj.iv);
       return res.redirect('/home/existing-account');
     }
 
     // Add the new user and kick off an asynchronous call to manually run the web hook
-    const addSuccess = await postgresqlApi.addUser(getUserIdResponse.id, getAccessTokenResponse.refreshToken);
+    const addSuccess = await postgresqlApi.addUser(getUserIdResponse.id, encryptionRespObj.encryption, encryptionRespObj.iv);
     if (!addSuccess) {
       return res.redirect('/signup-failure');
     }
-    await addDiscoverWeeklyToDiscoverYear(getUserIdResponse.id, getAccessTokenResponse.refreshToken);
+    await addDiscoverWeeklyToDiscoverYear(getUserIdResponse.id, encryptionRespObj.encryption, encryptionRespObj.iv);
 
     // If all is well, redirect the user to the signup success page
     return res.redirect('/signup-success');

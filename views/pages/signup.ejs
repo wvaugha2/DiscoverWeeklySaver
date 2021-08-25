@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%- include('../partials/head'); %>
+  </head>
+  <body>
+    <div class="bgSecondary fullWidth fullHeight py-5">
+      <!-- Navigation -->
+      <%- include('../partials/navbar', {
+        links: [
+          {
+            disabled: false,
+            url: hostUrl,
+            text: 'Home'
+          }
+        ]
+      }); %>
+
+      <!-- Content -->
+      <div class="container">
+        <div class="row h-100 d-flex justify-content-center align-items-center">
+          <div class="col-lg-6 col-md-8 col-sm-10 col-xs-10">
+            <% if(isSuccessful) { %>
+              <h1 class="text-center display-4 my-5">Success!</h1>
+              <p class="text-center">You are now signed up for the Discover Weekly Saver application! You can unsubscribe from this app at any time by removing Discover Weekly Saver's access in your Spotify account's settings. If you remove access, your account will be removed the next time Discover Weekly Saver updates behind the scenes once every 24 hours.</p>
+            <% } else { %>
+              <h1 class="text-center display-4 my-5">Oops</h1>
+              <p class="text-center">Something went wrong, please try again later to sign up for this service.</p>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

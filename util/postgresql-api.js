@@ -57,9 +57,10 @@ const getUsers = async () => {
  * @description Adds a new user to the application
  * @param {string} userId - the id of the user to add
  * @param {refreshToken} refreshToken - the refresh_token of the user to add
+ * @param {string} iv - the initialization vector used to encrypt the refresh token
  * @returns {Boolean} true on success, false on failure
  */
-const addUser = async (userId, refreshToken) => {
+const addUser = async (userId, refreshToken, iv) => {
   return new Promise(async (resolve) => {
     pool.connect(async (error, client, done) => {
       // If an error occurred, throw
@@ -70,8 +71,8 @@ const addUser = async (userId, refreshToken) => {
 
       try {
         // Perform the query to retrieve the results and release the client
-        const query = 'INSERT INTO public."Users" (user_id, refresh_token) VALUES ($1, $2)';
-        await client.query(query, [userId, refreshToken]);
+        const query = 'INSERT INTO public."Users" (user_id, refresh_token, iv) VALUES ($1, $2, $3)';
+        await client.query(query, [userId, refreshToken, iv]);
         client.release();
 
         // Update the local state for number of users currently signed up
@@ -91,10 +92,11 @@ const addUser = async (userId, refreshToken) => {
 /**
  * @description Updates a user for the application
  * @param {string} userId - the id of the user to update
- * @param {refreshToken} refreshToken - the new refresh_token of the user
+ * @param {string} refreshToken - the new refresh_token of the user
+ * @param {string} iv - the initialization vector used to encrypt the refresh token
  * @returns {Boolean} true on success, false on failure
  */
-const updateUser = async (userId, refreshToken) => {
+const updateUser = async (userId, refreshToken, iv) => {
   return new Promise(async (resolve) => {
     pool.connect(async (error, client, done) => {
       // If an error occurred, throw
@@ -105,8 +107,8 @@ const updateUser = async (userId, refreshToken) => {
 
       try {
         // Perform the query to retrieve the results and release the client
-        const query = 'UPDATE public."Users" SET refresh_token = $2 WHERE user_id = $1';
-        await client.query(query, [userId, refreshToken]);
+        const query = 'UPDATE public."Users" SET refresh_token = $2, iv = $3 WHERE user_id = $1';
+        await client.query(query, [userId, refreshToken, iv]);
         client.release();
 
         // Return the results

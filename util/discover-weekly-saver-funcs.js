@@ -1,20 +1,28 @@
 const spotifyApi = require('./spotify-api');
 const postgresqlApi = require('./postgresql-api');
 const nodeEnv = require('./nodeEnv');
+const crypto = require('../util/crypto');
 
 /**
  * @description This function adds the current Discover Weekly playlist to the current's year's Discover Year playlist
  * @param {string} userId - the user id of the current user
  * @param {string} refreshToken - the refresh_token of the current user
+ * @param {string} iv - the initialization vector needed for decryption
  */
-const addDiscoverWeeklyToDiscoverYear = async (userId, refreshToken) => {
+const addDiscoverWeeklyToDiscoverYear = async (userId, refreshToken, iv) => {
   let accessToken = null;
   let discoverWeeklyId = null;
   let discoverYearId = null;
 
   try {
+    // 0. Decrypt the refresh token
+    const decryptedRefreshToken = crypto.decrypt(refreshToken, iv);
+    if (!decryptedRefreshToken) {
+      return;
+    }
+
     // 1. Fetch an access token
-    const getAccessTokenResponse = await spotifyApi.getAccessToken(null, refreshToken);
+    const getAccessTokenResponse = await spotifyApi.getAccessToken(null, decryptedRefreshToken);
     if (!getAccessTokenResponse || getAccessTokenResponse.status !== 'SUCCESS') {
       // If the user has revoked access, remove them from the application
       if (getAccessTokenResponse && getAccessTokenResponse.message === 'invalid_grant') {
@@ -26,7 +34,14 @@ const addDiscoverWeeklyToDiscoverYear = async (userId, refreshToken) => {
 
     // If a new refresh token was returned for the user, update the refresh token
     if (getAccessTokenResponse.refreshToken) {
-      await postgresqlApi.updateUser(userId, getAccessTokenResponse.refreshToken);
+      // Encrypt the new refresh token
+      const encryptRespObj = crypto.encrypt(getAccessTokenResponse.refreshToken);
+      if (!encryptRespObj) {
+        return;
+      }
+
+      // Store new refresh token and iv
+      await postgresqlApi.updateUser(userId, encryptRespObj.encryption, encryptRespObj.iv);
     }
 
     // 2. Fetch the current user's playlists
